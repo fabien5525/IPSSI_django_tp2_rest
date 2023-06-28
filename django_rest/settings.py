@@ -55,10 +55,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
-BACKENDS = [
-    'api.backends.CustomUserBackend',
-    'django.contrib.auth.backends.ModelBackend',
-]
+BACKENDS = []
 
 ROOT_URLCONF = 'django_rest.urls'
 

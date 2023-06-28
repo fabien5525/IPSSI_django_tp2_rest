@@ -1,6 +1,7 @@
 from rest_framework import viewsets
-from .models import User, Project, State, Ticket
-from .serializers import UserSerializer, ProjectSerializer, StateSerializer, TicketSerializer
+from .models import  Project, State, Ticket
+from django.contrib.auth.models import User
+from .serializers import ProjectSerializer, StateSerializer, TicketSerializer, UserSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

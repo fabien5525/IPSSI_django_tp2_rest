@@ -3,7 +3,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from api.views import UserViewSet, ProjectViewSet, StateViewSet, TicketViewSet
+from api.views import ProjectViewSet, StateViewSet, TicketViewSet, UserViewSet
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
