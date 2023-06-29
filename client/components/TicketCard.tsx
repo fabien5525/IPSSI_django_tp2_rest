@@ -1,22 +1,23 @@
 import { Card, CardActions, CardContent, Typography } from "@mui/material";
+import Ticket from "../models/Ticket";
 
 interface TicketCardProps {
-  title: string;
-  description: string;
-  username: string | null;
+  ticket: Ticket;
 }
 
 const TicketCard = (props: TicketCardProps) => {
-  const { title, username } = props;
+  const { title, user } = props.ticket;
   const description =
-    props.description.length > 50
-      ? props.description.substring(0, 46) + " ..."
-      : props.description;
+    props.ticket.description.length > 50
+      ? props.ticket.description.substring(0, 46) + " ..."
+      : props.ticket.description;
 
   return (
-    <Card style={{
+    <Card
+      style={{
         marginBottom: "8px",
-    }}>
+      }}
+    >
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
           {title}
@@ -26,9 +27,9 @@ const TicketCard = (props: TicketCardProps) => {
         </Typography>
       </CardContent>
       <CardActions>
-        {username && (
+        {user && (
           <Typography variant="body2" color="text.secondary">
-            {username}
+            {user}
           </Typography>
         )}
       </CardActions>

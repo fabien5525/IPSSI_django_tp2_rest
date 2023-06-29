@@ -55,6 +55,12 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'DELETE']
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000/'
+]
+
 BACKENDS = []
 
 ROOT_URLCONF = 'django_rest.urls'
@@ -129,6 +135,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'DELETE']

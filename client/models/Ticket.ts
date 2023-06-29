@@ -3,6 +3,6 @@ export default interface Ticket {
     title: string;
     description: string;
     state: number;
-    user: number;
+    user: number | null;
     createdAt: string;
 }

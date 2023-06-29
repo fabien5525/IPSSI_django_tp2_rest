@@ -12,58 +12,106 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import State from "../../models/State";
+import dynamic from "next/dynamic";
 
 interface AddTicketModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   states: State[];
+  updateTickets: () => void;
 }
 
-const AddTicketModal = ({ open, setOpen, states }: AddTicketModalProps) => {
+interface Message {
+  type: "success" | "error";
+  message: string;
+}
+
+const CustomEditor = dynamic(
+  () => import("../../components/CustomEditor"),
+  { ssr: false }
+);
+
+const AddTicketModal = ({
+  open,
+  setOpen,
+  states,
+  updateTickets,
+}: AddTicketModalProps) => {
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [state, setState] = useState<"">(undefined);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [description, setDescription] = useState(" ");
+  const [state, setState] = useState<State | undefined>(undefined);
+  const [message, setMessage] = useState<Message>({
+    type: "success",
+    message: "",
+  });
+
+  const onCKChange = useCallback((value: any) => {
+    console.log("CK Change");
+    console.log("value", value);
+  }, []);
+
+  useEffect(() => {
+    if (states.length > 0) {
+      setState(states[0]);
+    }
+  }, [states]);
+
+  const resetMessage = () => {
+    setMessage({
+      type: "success",
+      message: "",
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
+    resetMessage();
 
-    const url = process.env.API_URL;
+    const URL = process.env.NEXT_PUBLIC_NEXT_API_URL;
 
     if (
-      !url ||
+      !URL ||
       !title ||
       title === "" ||
       !description ||
       description === "" ||
       !state
     ) {
-      setErrorMessage("Veuillez remplir tous les champs");
+      setMessage({
+        type: "error",
+        message: !URL ? "Problème d'url" : "Veuillez remplir tous les champs",
+      });
+      !URL && console.error("NEXT_PUBLIC_NEXT_API_URL is not defined", URL);
       return;
     }
 
-    fetch(`${url}/tickets`, {
+    fetch(`${URL}/tickets`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        "title": title,
-        "description": description,
-        "state": state?.id,
+        title: title,
+        description: description,
+        state: state.id,
       }),
-    }).then((res) => {
-      if (res.status === 201) {
-        setOpen(false);
-      } else {
-        res.json().then((data) => {
-          setErrorMessage(data.message);
-        });
-      }
-    }); 
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          updateTickets();
+          setOpen(false);
+          resetMessage();
+        } else {
+          setMessage({
+            type: "success",
+            message: "Une erreur est survenue lors de l'auout du ticket",
+          });
+        }
+      });
   };
 
   return (
@@ -108,33 +156,56 @@ const AddTicketModal = ({ open, setOpen, states }: AddTicketModalProps) => {
               gap: "1rem",
             }}
           >
-            <TextField label="Title" variant="outlined" fullWidth />
             <TextField
-              label="Description"
+              label="Title"
               variant="outlined"
               fullWidth
-              multiline
-              rows={4}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
-            <FormControl>
-              <InputLabel id="demo-simple-select-helper-label">État</InputLabel>
-              <Select
-                value={state}
-                label="Etat"
-                onChange={(e) => setState(e.target.value as State)}
-              >
-                {states.map((myState : State, index) => (
-                  <MenuItem value={myState.name} key={`state-${index}`}>
-                    {myState.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <div
+              style={{
+                minHeight: "200px",
+              }}
+            >
+              <CustomEditor
+                value={description}
+                setValue={setDescription}
+              />
+            </div>
+            {description}
+            {state && (
+              <FormControl>
+                <InputLabel id="demo-simple-select-helper-label">
+                  État
+                </InputLabel>
+                <Select
+                  value={state.name}
+                  label="Etat"
+                  onChange={(e) => {
+                    const newState = states.find(
+                      (state) => state.name === e.target.value
+                    );
+                    if (newState) {
+                      setState(newState);
+                    }
+                  }}
+                >
+                  {states.map((myState: State, index) => (
+                    <MenuItem value={myState.name} key={`state-${index}`}>
+                      {myState.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
             <Button type="submit">Créer</Button>
           </form>
 
-          {errorMessage && (
-            <FormHelperText error>{errorMessage}</FormHelperText>
+          {message && (
+            <FormHelperText error={message.type === "error"}>
+              {message.message}
+            </FormHelperText>
           )}
         </Box>
       </Fade>

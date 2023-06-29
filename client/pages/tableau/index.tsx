@@ -1,108 +1,139 @@
 import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { NextPage } from "next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TicketCard from "../../components/TicketCard";
 import AddTicketModal from "../../components/ticket/AddTicketModal";
-
-interface Ticket {
-  id: number;
-  title: string;
-  state: string;
-  description: string;
-  project: string;
-  user: string;
-  createdAt: Date;
-}
-
-type SimpleTicket = {
-  title: string;
-  state: string;
-};
+import State from "../../models/State";
+import Ticket from "../../models/Ticket";
 
 const Tableau: NextPage = () => {
   const [openAddTicketModal, setOpenAddTicketModal] = useState(false);
+  const [loaded, setLoaded] = useState({
+    states: false,
+    tickets: false,
+  });
+  const [states, setStates] = useState<State[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
 
-  const [states, setStates] = useState<string[]>([
-    "Prêt à dev",
-    "Dev en cours",
-    "Review de code",
-    "Recette interne",
-    "Recette client",
-    "Go prod",
-    "Terminé",
-  ]);
+  const updateTickets = () => {
+    const URL = process.env.NEXT_PUBLIC_NEXT_API_URL;
 
-  const [tickets, setTickets] = useState<SimpleTicket[]>([
-    { title: "Ticket 1", state: "Prêt à dev" },
-    { title: "Ticket 2", state: "Dev en cours" },
-    { title: "Ticket 2", state: "Dev en cours" },
-    { title: "Ticket 3", state: "Review de code" },
-    { title: "Ticket 4", state: "Recette interne" },
-    { title: "Ticket 5", state: "Recette client" },
-    { title: "Ticket 5", state: "Recette client" },
-    { title: "Ticket 6", state: "Go prod" },
-    { title: "Ticket 7", state: "Terminé" },
-  ]);
+    if (!URL) {
+      console.error("NEXT_PUBLIC_NEXT_API_URL is not defined");
+      return;
+    }
+
+    fetch(`${URL}/states`, { method: "GET" }).then((response) => {
+      if (!response.ok) {
+        console.error("Error while fetching states");
+        return;
+      }
+      response.json().then((data) => {
+        const newStates = data.data as State[];
+        setStates(newStates);
+        setLoaded((prev) => ({ ...prev, states: true }));
+      });
+    });
+  };
+
+  const updateStates = () => {
+    const URL = process.env.NEXT_PUBLIC_NEXT_API_URL;
+
+    if (!URL) {
+      console.error("NEXT_PUBLIC_NEXT_API_URL is not defined");
+      return;
+    }
+
+    fetch(`${URL}/tickets`, { method: "GET" }).then((response) => {
+      if (!response.ok) {
+        console.error("Error while fetching tickets");
+        return;
+      }
+      response.json().then((data) => {
+        const newTickets = data.data as Ticket[];
+        setTickets(newTickets);
+        setLoaded((prev) => ({ ...prev, tickets: true }));
+      });
+    });
+  };
+
+  useEffect(() => {
+    updateStates();
+    updateTickets();
+  }, []);
 
   return (
     <div style={{ padding: "2rem" }}>
       <h1 style={{ marginTop: "0px" }}>Tableau</h1>
-      <div
-        className="table"
-        style={{
-          width: `${266 * states.length}px`,
-          display: "flex",
-          flexDirection: "row",
-          gap: "8px",
-          marginBottom: "1rem",
-        }}
-      >
-        {states.map((state, indexState) => (
+      {loaded.states && loaded.tickets ? (
+        <>
           <div
-            className="col"
-            key={`state-${indexState}`}
+            className="table"
             style={{
-              backgroundColor: "#f5f5f5",
-              width: "250px",
-              paddingInline: "8px",
-              borderRadius: "8px",
+              width: `${266 * states.length}px`,
+              display: "flex",
+              flexDirection: "row",
+              gap: "8px",
+              marginBottom: "1rem",
             }}
           >
-            <div
-              className="header-col"
-              style={{
-                textAlign: "center",
-                fontWeight: "bold",
-                fontSize: "1.2rem",
-                padding: "8px",
-                textTransform: "uppercase",
-              }}
-            >
-              {state}
-            </div>
-            {tickets
-              .filter((ticket) => ticket.state === state)
-              .map(({ title }, indexTicket) => (
-                <TicketCard
-                  key={`ticket-${indexState}-${indexTicket}`}
-                  title={title}
-                  description=""
-                  username={null}
-                />
-              ))}
+            {states.map((state, indexState) => {
+              return (
+                <div
+                  className="col"
+                  key={`state-${indexState}`}
+                  style={{
+                    backgroundColor: "#f5f5f5",
+                    width: "250px",
+                    paddingInline: "8px",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <div
+                    className="header-col"
+                    style={{
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      fontSize: "1.2rem",
+                      padding: "8px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {state.name}
+                  </div>
+                  <div>
+                    {tickets
+                      .filter((ticket) => ticket.state === state.id)
+                      .map((ticket, indexTicket) => (
+                        <TicketCard
+                          key={`ticket-${indexState}-${indexTicket}`}
+                          ticket={ticket}
+                        />
+                      ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
-      <div className="actions">
-        <Button variant="contained" onClick={() => setOpenAddTicketModal(true)}>
-          <AddIcon /> Ajouter un ticket
-        </Button>
-      </div>
+          <div className="actions">
+            <Button
+              variant="contained"
+              onClick={() => setOpenAddTicketModal(true)}
+            >
+              <AddIcon /> Ajouter un ticket
+            </Button>
+          </div>
+        </>
+      ) : (
+        <div>Chargement...</div>
+      )}
+
       <AddTicketModal
         open={openAddTicketModal}
         setOpen={setOpenAddTicketModal}
-        states={[]}
+        states={states}
+        updateTickets={updateTickets}
       />
     </div>
   );

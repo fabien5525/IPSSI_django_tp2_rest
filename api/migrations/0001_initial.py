@@ -44,4 +44,17 @@ class Migration(migrations.Migration):
                 ('users', models.ManyToManyField(related_name='projects', to=settings.AUTH_USER_MODEL)),
             ],
         ),
+
+        # add states (Prêt à dev, Dev en cours, Review, Recette interne, Recette client, Go prod, Terminé)
+        migrations.RunSQL(
+            """
+            INSERT INTO api_state (name, createdAt) VALUES ('Prêt à dev', '2023-06-29 00:00:00');
+            INSERT INTO api_state (name, createdAt) VALUES ('Dev en cours', '2023-06-29 00:00:00');
+            INSERT INTO api_state (name, createdAt) VALUES ('Review', '2023-06-29 00:00:00');
+            INSERT INTO api_state (name, createdAt) VALUES ('Recette interne', '2023-06-29 00:00:00');
+            INSERT INTO api_state (name, createdAt) VALUES ('Recette client', '2023-06-29 00:00:00');
+            INSERT INTO api_state (name, createdAt) VALUES ('Go prod', '2023-06-29 00:00:00');
+            INSERT INTO api_state (name, createdAt) VALUES ('Terminé', '2023-06-29 00:00:00');
+            """
+        ),
     ]

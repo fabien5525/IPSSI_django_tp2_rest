@@ -5,14 +5,13 @@ import { useEffect } from 'react'
 const Home: NextPage = () => {
   const router = useRouter();
 
-  //redirect to /login if not logged in
   useEffect(() => {
     if (localStorage) {
       if (!localStorage.getItem('token')) {
-        router.push('/login')
+        router.push('/connexion')
         return;
       }
-      router.push('/dashboard');
+      router.push('/projet');
     }
   });
 
