@@ -6,7 +6,7 @@ interface TicketCardProps {
 }
 
 const TicketCard = (props: TicketCardProps) => {
-  const { title, user } = props.ticket;
+  const { id, title, user } = props.ticket;
   const description =
     props.ticket.description.length > 50
       ? props.ticket.description.substring(0, 46) + " ..."
@@ -32,6 +32,9 @@ const TicketCard = (props: TicketCardProps) => {
             {user}
           </Typography>
         )}
+        <Typography variant="body2" color="text.secondary">
+            {id}
+          </Typography>
       </CardActions>
     </Card>
   );

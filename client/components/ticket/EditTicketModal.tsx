@@ -15,12 +15,14 @@ import {
 import { useEffect, useState, useCallback } from "react";
 import State from "../../models/State";
 import dynamic from "next/dynamic";
+import Ticket from "../../models/Ticket";
 
 interface AddTicketModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   states: State[];
   updateTickets: () => void;
+  ticket: Ticket;
 }
 
 interface Message {
@@ -28,20 +30,20 @@ interface Message {
   message: string;
 }
 
-const CustomEditor = dynamic(
-  () => import("../../components/CustomEditor"),
-  { ssr: false }
-);
+const CustomEditor = dynamic(() => import("../CustomEditor"), {
+  ssr: false,
+});
 
-const AddTicketModal = ({
+const EditTicketModal = ({
   open,
   setOpen,
   states,
+  ticket,
   updateTickets,
 }: AddTicketModalProps) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState(" ");
-  const [state, setState] = useState<State | undefined>(undefined);
+  const [title, setTitle] = useState(ticket.title);
+  const [description, setDescription] = useState(ticket.description);
+  const [state, setState] = useState<State | undefined>();
   const [message, setMessage] = useState<Message>({
     type: "success",
     message: "",
@@ -49,9 +51,12 @@ const AddTicketModal = ({
 
   useEffect(() => {
     if (states.length > 0) {
-      setState(states[0]);
+      const myState = states.find((state) => state.id === ticket.state);
+      if (myState) {
+        setState(myState);
+      }
     }
-  }, [states]);
+  }, [states, ticket.state]);
 
   const resetMessage = () => {
     setMessage({
@@ -163,10 +168,7 @@ const AddTicketModal = ({
                 minHeight: "200px",
               }}
             >
-              <CustomEditor
-                value={description}
-                setValue={setDescription}
-              />
+              <CustomEditor value={description} setValue={setDescription} />
             </div>
             {description}
             {state && (
@@ -194,7 +196,7 @@ const AddTicketModal = ({
                 </Select>
               </FormControl>
             )}
-            <Button type="submit">Créer</Button>
+            <Button type="submit">Modifier</Button>
           </form>
 
           {message && (
@@ -208,4 +210,4 @@ const AddTicketModal = ({
   );
 };
 
-export default AddTicketModal;
+export default EditTicketModal;
