@@ -28,10 +28,9 @@ interface Message {
   message: string;
 }
 
-const CustomEditor = dynamic(
-  () => import("../../components/CustomEditor"),
-  { ssr: false }
-);
+const CustomEditor = dynamic(() => import("../../components/CustomEditor"), {
+  ssr: false,
+});
 
 const AddTicketModal = ({
   open,
@@ -83,10 +82,11 @@ const AddTicketModal = ({
       return;
     }
 
-    fetch(`${URL}/tickets`, {
+    fetch(`${URL}/tickets/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": "Token " + localStorage?.getItem("token"),
       },
       body: JSON.stringify({
         title: title,
@@ -100,6 +100,9 @@ const AddTicketModal = ({
           updateTickets();
           setOpen(false);
           resetMessage();
+          setTitle("");
+          setDescription("");
+          setState(states[0]);
         } else {
           setMessage({
             type: "success",
@@ -163,12 +166,8 @@ const AddTicketModal = ({
                 minHeight: "200px",
               }}
             >
-              <CustomEditor
-                value={description}
-                setValue={setDescription}
-              />
+              <CustomEditor value={description} setValue={setDescription} />
             </div>
-            {description}
             {state && (
               <FormControl>
                 <InputLabel id="demo-simple-select-helper-label">

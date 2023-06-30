@@ -6,28 +6,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     switch (method) {
         case 'GET':
-            await getAll(req, res)
+            await getAll(req, res);
             break
         default:
-            res.setHeader('Allow', ['GET'])
-            res.status(405).end(`Method ${method} Not Allowed`)
+            res.setHeader('Allow', ['GET']);
+            res.status(405).end(`Method ${method} Not Allowed`);
     }
 }
 
 const getAll = async (req: NextApiRequest, res: NextApiResponse) => {
     const URL = process.env.NEXT_PUBLIC_DJANGO_API_URL;
 
-    const response = await fetch(`${URL}/states`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-
-    if (response.status !== 200) {
+    if (!URL) {
+        console.log("No URL", URL);
         res.status(500).json({ data: [] });
+        return;
     }
 
-    const data = await response.json() as State[];
-    res.status(200).json({ data: data });
+    try {
+        const response = await fetch(`${URL}/states/`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": req.headers?.authorization ?? "",
+            },
+        });
+
+        console.log("Response status:", response.status);
+
+        if (response.status !== 200) {
+            console.log("Request failed with status:", response.status);
+            res.status(500).json({ data: [] });
+        }
+
+        const data = await response.json() as State[];
+        res.status(200).json({ data: data });
+    } catch (error) {
+        console.error("Fetch error:", error);
+        res.status(500).json({ data: [] });
+    }
 }

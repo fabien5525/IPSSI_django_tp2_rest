@@ -50,13 +50,15 @@ const EditTicketModal = ({
   });
 
   useEffect(() => {
+    setTitle(ticket.title);
+    setDescription(ticket.description);
     if (states.length > 0) {
       const myState = states.find((state) => state.id === ticket.state);
       if (myState) {
         setState(myState);
       }
     }
-  }, [states, ticket.state]);
+  }, [states, ticket]);
 
   const resetMessage = () => {
     setMessage({
@@ -88,30 +90,63 @@ const EditTicketModal = ({
       return;
     }
 
-    fetch(`${URL}/tickets`, {
-      method: "POST",
+    fetch(`${URL}/tickets/${ticket.id}`, {
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": "Token " + localStorage?.getItem("token"),
       },
       body: JSON.stringify({
         title: title,
         description: description,
         state: state.id,
       }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data) {
-          updateTickets();
-          setOpen(false);
-          resetMessage();
-        } else {
-          setMessage({
-            type: "success",
-            message: "Une erreur est survenue lors de l'auout du ticket",
-          });
-        }
-      });
+    }).then((res) => {
+      if (res.ok) {
+        updateTickets();
+        setOpen(false);
+        resetMessage();
+      } else {
+        setMessage({
+          type: "success",
+          message: "Une erreur est survenue lors de l'édition du ticket",
+        });
+      }
+    });
+  };
+
+  const handleDelete = () => {
+    const URL = process.env.NEXT_PUBLIC_NEXT_API_URL;
+
+    if (!URL) {
+      console.error("NEXT_PUBLIC_NEXT_API_URL is not defined", URL);
+      return;
+    }
+
+    console.log("url", URL, ticket.id);
+
+    fetch(`${URL}/tickets`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Token " + localStorage?.getItem("token"),
+      },
+      body: JSON.stringify({
+        id: ticket.id,
+      }),
+    }).then((res) => {
+      console.log("aled", res);
+      if (res.ok) {
+        updateTickets();
+        setOpen(false);
+        resetMessage();
+      } else {
+        setMessage({
+          type: "success",
+          message: "Une erreur est survenue lors de la suppression du ticket",
+        });
+      }
+    });
   };
 
   return (
@@ -170,7 +205,6 @@ const EditTicketModal = ({
             >
               <CustomEditor value={description} setValue={setDescription} />
             </div>
-            {description}
             {state && (
               <FormControl>
                 <InputLabel id="demo-simple-select-helper-label">
@@ -196,9 +230,36 @@ const EditTicketModal = ({
                 </Select>
               </FormControl>
             )}
-            <Button type="submit">Modifier</Button>
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "1rem",
+              }}
+            >
+              <Button
+                type="submit"
+                variant="contained"
+                style={{
+                  maxWidth: "fit-content",
+                }}
+              >
+                Modifier
+              </Button>
+              <Button
+                onClick={handleDelete}
+                variant="contained"
+                style={{
+                  backgroundColor: "red",
+                  maxWidth: "fit-content",
+                }}
+              >
+                Supprimer
+              </Button>
+            </div>
           </form>
-
           {message && (
             <FormHelperText error={message.type === "error"}>
               {message.message}

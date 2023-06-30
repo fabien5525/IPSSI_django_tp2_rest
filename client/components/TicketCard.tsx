@@ -7,10 +7,14 @@ interface TicketCardProps {
 
 const TicketCard = (props: TicketCardProps) => {
   const { id, title, user } = props.ticket;
+  const tmpDescription = props.ticket.description.replace(
+    /<\/?[^>]+(>|$)/g,
+    ""
+  );
   const description =
-    props.ticket.description.length > 50
-      ? props.ticket.description.substring(0, 46) + " ..."
-      : props.ticket.description;
+    tmpDescription.length > 50
+      ? tmpDescription.substring(0, 46) + " ..."
+      : tmpDescription;
 
   return (
     <Card
@@ -33,8 +37,8 @@ const TicketCard = (props: TicketCardProps) => {
           </Typography>
         )}
         <Typography variant="body2" color="text.secondary">
-            {id}
-          </Typography>
+          {id}
+        </Typography>
       </CardActions>
     </Card>
   );

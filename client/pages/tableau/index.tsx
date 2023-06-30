@@ -17,6 +17,9 @@ import EditTicketModal from "../../components/ticket/EditTicketModal";
 const Tableau: NextPage = () => {
   const [openAddTicketModal, setOpenAddTicketModal] = useState(false);
   const [openEditTicketModal, setOpenEditTicketModal] = useState(false);
+  const [ticketToEdit, setTicketToEdit] = useState<Ticket | undefined>(
+    undefined
+  );
   const [loaded, setLoaded] = useState({
     states: false,
     tickets: false,
@@ -32,7 +35,19 @@ const Tableau: NextPage = () => {
       return;
     }
 
-    fetch(`${URL}/states`, { method: "GET" }).then((response) => {
+    fetch(`${URL}/states`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Token " + localStorage?.getItem("token"),
+      },
+    }).then((response) => {
+      console.log(
+        "response state",
+        response.ok,
+        response.status,
+        response.statusText
+      );
       if (!response.ok) {
         console.error("Error while fetching states");
         return;
@@ -53,7 +68,13 @@ const Tableau: NextPage = () => {
       return;
     }
 
-    fetch(`${URL}/tickets`, { method: "GET" }).then((response) => {
+    fetch(`${URL}/tickets/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Token " + localStorage?.getItem("token"),
+      },
+    }).then((response) => {
       if (!response.ok) {
         console.error("Error while fetching tickets");
         return;
@@ -81,17 +102,25 @@ const Tableau: NextPage = () => {
     // Récupérer l'id du ticket déplacé
     const ticketId = source.index;
 
+    // Récupérer l'id de l'état source
+    const oldStateId = source.droppableId;
+
     // Récupérer l'id de l'état destination
     const newStateId = destination.droppableId;
 
+    if (oldStateId === newStateId) {
+      return;
+    }
+
     const URL = process.env.NEXT_PUBLIC_NEXT_API_URL;
 
-    fetch(`${URL}/tickets/`, {
+    fetch(`${URL}/tickets/${ticketId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": "Token " + localStorage?.getItem("token"),
       },
-      body: JSON.stringify({ id: ticketId, state: newStateId }),
+      body: JSON.stringify({ state: newStateId }),
     }).then((response) => {
       if (!response.ok) {
         console.error("Error while updating ticket state");
@@ -105,9 +134,10 @@ const Tableau: NextPage = () => {
     });
   };
 
-  const handleClickTicket = (ticket : Ticket) => {
-    console.log("Ticket cliqué :", ticket.id);
-  }
+  const handleClickTicket = (ticket: Ticket) => {
+    setOpenEditTicketModal(true);
+    setTicketToEdit(ticket);
+  };
 
   return (
     <DragDropContext onDragEnd={handleDragTicket}>
@@ -200,13 +230,15 @@ const Tableau: NextPage = () => {
           states={states}
           updateTickets={updateTickets}
         />
-        {/* <EditTicketModal
-          open={openEditTicketModal}
-          setOpen={setOpenEditTicketModal}
-          states={states}
-          updateTickets={updateTickets}
-          ticket={null} */}
-          
+        {ticketToEdit && (
+          <EditTicketModal
+            open={openEditTicketModal}
+            setOpen={setOpenEditTicketModal}
+            states={states}
+            updateTickets={updateTickets}
+            ticket={ticketToEdit}
+          />
+        )}
       </div>
     </DragDropContext>
   );
