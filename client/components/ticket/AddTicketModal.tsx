@@ -144,7 +144,7 @@ const AddTicketModal = ({
               marginBottom: "1rem",
             }}
           >
-            Add Ticket
+            Ajout Ticket
           </Typography>
           <form
             onSubmit={handleSubmit}

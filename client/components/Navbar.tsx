@@ -23,6 +23,7 @@ const Navbar = ({ setOpenDrawer }: NavbarProps) => {
       localStorage.removeItem("token");
       setToken(null);
       router.push("/connexion");
+      window.location.reload();
     }
   };
 

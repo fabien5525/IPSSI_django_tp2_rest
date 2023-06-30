@@ -17,7 +17,7 @@ import State from "../../models/State";
 import dynamic from "next/dynamic";
 import Ticket from "../../models/Ticket";
 
-interface AddTicketModalProps {
+interface EditTicketModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   states: State[];
@@ -40,7 +40,7 @@ const EditTicketModal = ({
   states,
   ticket,
   updateTickets,
-}: AddTicketModalProps) => {
+}: EditTicketModalProps) => {
   const [title, setTitle] = useState(ticket.title);
   const [description, setDescription] = useState(ticket.description);
   const [state, setState] = useState<State | undefined>();
@@ -90,7 +90,7 @@ const EditTicketModal = ({
       return;
     }
 
-    fetch(`${URL}/tickets/${ticket.id}`, {
+    fetch(`${URL}/tickets/${ticket.id}/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -125,7 +125,7 @@ const EditTicketModal = ({
 
     console.log("url", URL, ticket.id);
 
-    fetch(`${URL}/tickets`, {
+    fetch(`${URL}/tickets/${ticket.id}/`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -181,7 +181,7 @@ const EditTicketModal = ({
               marginBottom: "1rem",
             }}
           >
-            Add Ticket
+            Edition ticket
           </Typography>
           <form
             onSubmit={handleSubmit}

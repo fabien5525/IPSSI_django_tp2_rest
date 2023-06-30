@@ -35,9 +35,10 @@ class TicketViewSet(viewsets.ModelViewSet):
 class register_view(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
+        password = request.data['password']
         if serializer.is_valid():
             # hash password
-            serializer.validated_data['password'] = make_password(serializer.validated_data['password'])
+            serializer.validated_data['password'] = make_password(password)
             serializer.save()
             user = User.objects.get(username=serializer.data['username'])
             token, _ = Token.objects.get_or_create(user=user)

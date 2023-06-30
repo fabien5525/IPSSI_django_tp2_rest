@@ -89,6 +89,7 @@ const Connexion: NextPage = () => {
                 variant="outlined"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                type="password"
               />
               <Button variant="contained" type="submit">
                 Se connecter

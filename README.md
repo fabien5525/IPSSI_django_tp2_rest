@@ -1,4 +1,4 @@
-# Install Porject
+# Install Project
 
 ## Back - API Django rest
 

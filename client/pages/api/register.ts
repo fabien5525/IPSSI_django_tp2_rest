@@ -31,8 +31,11 @@ const post = async (req: NextApiRequest, res: NextApiResponse) => {
         body: JSON.stringify(req.body),
     });
 
+    console.log(response);
+    console.log(req.body);
+
     if (!response.ok) {
-        res.status(500).end();
+        res.status(500).end("Error");
         return;
     }
 

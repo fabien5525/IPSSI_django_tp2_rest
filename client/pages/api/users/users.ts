@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import Ticket from "../../../models/Ticket";
+import User from "../../../models/User";
 
 const getAll = async (req: NextApiRequest, res: NextApiResponse) => {
     const URL = process.env.NEXT_PUBLIC_DJANGO_API_URL;
@@ -12,7 +12,7 @@ const getAll = async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log(req.headers?.authorization ?? "")
 
-    const response = await fetch(`${URL}/tickets`, {
+    const response = await fetch(`${URL}/users`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -20,12 +20,18 @@ const getAll = async (req: NextApiRequest, res: NextApiResponse) => {
         },
     });
 
-    if (response.status !== 200) {
-        res.status(500).json({ data: [] });
+    if (response.status === 403) {
+        res.status(403).end("Error");
         return;
     }
 
-    const data = await response.json() as Ticket[];
+    if (!response.ok) {
+        res.status(500).end("Error");
+        return;
+    }
+
+    const data = await response.json() as User[];
+
     res.status(200).json({ data: data });
 }
 
@@ -38,7 +44,7 @@ const post = async (req: NextApiRequest, res: NextApiResponse) => {
         return;
     }
 
-    const response = await fetch(`${URL}/tickets/`, {
+    const response = await fetch(`${URL}/users/`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -47,28 +53,27 @@ const post = async (req: NextApiRequest, res: NextApiResponse) => {
         body: JSON.stringify(req.body),
     });
 
-    console.log(response.url)
+
 
     if (!response.ok) {
-        res.status(500).json({ data: null });
+        res.status(500).end("Error");
         return;
     }
 
-    const data = await response.json() as Ticket;
+    const data = await response.json() as User;
     res.status(200).json({ data: data });
 }
 
 const patch = async (req: NextApiRequest, res: NextApiResponse) => {
     const URL = process.env.NEXT_PUBLIC_DJANGO_API_URL;
-    const id = req.query.id;
 
-    if (!URL || !id) {
-        console.error("No URL found | No ID found", URL, id);
-        res.status(500).end(`Error updating ticket with id ${id}`);
+    if (!URL) {
+        console.error("No URL found", URL);
+        res.status(500).end("Error creating ticket");
         return;
     }
 
-    const response = await fetch(`${URL}/tickets/${id}/`, {
+    const response = await fetch(`${URL}/users/${req.query.id}/`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
@@ -78,40 +83,35 @@ const patch = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     if (!response.ok) {
-        res.status(500).json({ data: null });
+        res.status(500).end("Error");
         return;
     }
 
-    const data = await response.json() as Ticket;
+    const data = await response.json() as User;
     res.status(200).json({ data: data });
 }
 
 const remove = async (req: NextApiRequest, res: NextApiResponse) => {
     const URL = process.env.NEXT_PUBLIC_DJANGO_API_URL;
-    const id = req.query.id;
 
-    console.log(req.body, URL)
-
-    if (!URL || !id) {
-        console.error("No URL found | No ID found", URL, id);
-        res.status(500).end(`Error deleting ticket with id ${id}`);
+    if (!URL) {
+        console.error("No URL found", URL);
+        res.status(500).end("Error creating ticket");
         return;
     }
 
-    const response = await fetch(`${URL}/tickets/${id}/`, {
+    const response = await fetch(`${URL}/users/${req.query.id}/`, {
         method: "DELETE",
         headers: {
+            "Content-Type": "application/json",
             "Authorization": req.headers?.authorization ?? "",
         },
     });
 
-    console.log(response)
-
     if (!response.ok) {
-        res.status(500).end(`Error deleting ticket with id ${id}`);
+        res.status(500).end("Error");
         return;
     }
-
 
     res.status(200).end("Error");
 }

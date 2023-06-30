@@ -17,13 +17,8 @@ import EditTicketModal from "../../components/ticket/EditTicketModal";
 const Tableau: NextPage = () => {
   const [openAddTicketModal, setOpenAddTicketModal] = useState(false);
   const [openEditTicketModal, setOpenEditTicketModal] = useState(false);
-  const [ticketToEdit, setTicketToEdit] = useState<Ticket | undefined>(
-    undefined
-  );
-  const [loaded, setLoaded] = useState({
-    states: false,
-    tickets: false,
-  });
+  const [ticketToEdit, setTicketToEdit] = useState<Ticket | undefined>(undefined);
+  const [loaded, setLoaded] = useState({ states: false, tickets: false });
   const [states, setStates] = useState<State[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
 

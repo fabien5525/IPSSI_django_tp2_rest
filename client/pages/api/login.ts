@@ -32,7 +32,7 @@ const post = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     if (!response.ok) {
-        res.status(500).end();
+        res.status(500).end("Error");
         return;
     }
 
